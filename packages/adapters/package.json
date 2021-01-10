@@ -1,0 +1,27 @@
+{
+  "name": "@tsed/adapters",
+  "version": "6.20.0",
+  "description": "Database adapters for Ts.ED",
+  "main": "./lib/index.js",
+  "typings": "./lib/index.d.ts",
+  "scripts": {
+    "build": "tsc --build tsconfig.compile.json"
+  },
+  "dependencies": {
+    "@types/lowdb": "1.0.9",
+    "@types/uuid": "8.3.0",
+    "fs-extra": "^9.0.1",
+    "lowdb": "1.0.0",
+    "tslib": "2.0.1",
+    "uuid": "8.3.2"
+  },
+  "private": false,
+  "devDependencies": {
+    "@tsed/ajv": "6.20.0",
+    "@tsed/core": "6.20.0",
+    "@tsed/di": "6.20.0",
+    "@tsed/json-mapper": "6.20.0",
+    "@types/fs-extra": "9.0.1"
+  },
+  "peerDependencies": {}
+}

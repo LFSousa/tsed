@@ -50,7 +50,7 @@ module.exports = {
     docsBranch: "production",
     api: require("./public/api.json"),
     smoothScroll: true,
-    lastUpdated: 'Last updated',
+    lastUpdated: "Last updated",
     algolia: {
       apiKey: "f8a038207e461aaac0e2fd16403c2b01",
       indexName: "ts_ed"
@@ -127,6 +127,14 @@ module.exports = {
                   {
                     text: "Swagger",
                     link: "/tutorials/swagger.md"
+                  },
+                  {
+                    text: "OIDC",
+                    link: "/tutorials/oidc.md"
+                  },
+                  {
+                    text: "Stripe",
+                    link: "/tutorials/stripe.md"
                   }
                 ]
               },
@@ -240,7 +248,9 @@ module.exports = {
               { title: "Seq logger", path: "/tutorials/seq" },
               "/tutorials/swagger",
               "/tutorials/ajv",
-              "/tutorials/aws"
+              "/tutorials/aws",
+              "/tutorials/oidc",
+              "/tutorials/stripe"
             ]
           },
           {
@@ -272,6 +282,8 @@ module.exports = {
           "/tutorials/not-found-page",
           "/tutorials/aws",
           "/tutorials/seq",
+          "/tutorials/oidc",
+          "/tutorials/stripe",
           "/docs/controllers",
           "/docs/providers",
           "/docs/model",
@@ -288,14 +300,20 @@ module.exports = {
         ]
       }
     },
-    plugins: [
-      [
-        "@vuepress/google-analytics",
-        {
-          ga: "UA-35240348-1"
+    plugins: {
+      "@vuepress/google-analytics": {
+        ga: "UA-35240348-1"
+      },
+      "@vuepress/medium-zoom": {
+        selector: "figure img",
+        // medium-zoom options here
+        // See: https://github.com/francoischalifour/medium-zoom#options
+        options: {
+          margin: 16
         }
-      ]
-    ]
+
+      }
+    }
   },
   markdown: {
     lineNumbers: true,

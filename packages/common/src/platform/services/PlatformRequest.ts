@@ -21,6 +21,10 @@ declare global {
 export class PlatformRequest<T extends {[key: string]: any} = any> {
   constructor(@Opts public raw: T) {}
 
+  get secure(): boolean {
+    return this.raw.secure;
+  }
+
   /**
    * Get the url of the request.
    *
@@ -44,6 +48,10 @@ export class PlatformRequest<T extends {[key: string]: any} = any> {
    */
   get body(): any {
     return this.raw.body;
+  }
+
+  get rawBody(): any {
+    return this.raw.rawBody;
   }
 
   /**

@@ -1,10 +1,10 @@
 import {Injectable, InjectorService, ProviderScope, ProviderType, TokenProvider} from "@tsed/di";
-import {EndpointMetadata, HandlerMetadata} from "../../mvc";
+import {EndpointMetadata} from "../../mvc";
 import {PlatformControllerBuilder} from "../builder/PlatformControllerBuilder";
 import {ControllerProvider} from "../domain/ControllerProvider";
-import {IRoute, IRouteController, IRouteDetails} from "../interfaces/IRoute";
+import {PlatformRouteDetails} from "../domain/PlatformRouteDetails";
+import {IRoute, IRouteController} from "../interfaces/IRoute";
 import {PlatformApplication} from "./PlatformApplication";
-import {PlatformHandler} from "./PlatformHandler";
 import {PlatformRouter} from "./PlatformRouter";
 
 /**
@@ -18,11 +18,7 @@ import {PlatformRouter} from "./PlatformRouter";
 export class Platform {
   private _routes: IRouteController[] = [];
 
-  constructor(
-    readonly injector: InjectorService,
-    readonly platformApplication: PlatformApplication,
-    readonly platformHandler: PlatformHandler
-  ) {}
+  constructor(readonly injector: InjectorService, readonly platformApplication: PlatformApplication) {}
 
   get app() {
     return this.platformApplication;
@@ -30,14 +26,6 @@ export class Platform {
 
   get routes(): IRouteController[] {
     return this._routes || [];
-  }
-
-  /**
-   * Create a native handler function based on the given handlerMetadata.
-   * @param handler
-   */
-  public createHandler(handler: HandlerMetadata | any) {
-    return this.platformHandler.createHandler(handler);
   }
 
   /**
@@ -94,10 +82,10 @@ export class Platform {
 
   /**
    * Get all routes built by TsExpressDecorators and mounted on Express application.
-   * @returns {IRouteDetails[]}
+   * @returns {PlatformRouteDetails[]}
    */
-  public getRoutes(): IRouteDetails[] {
-    let routes: IRouteDetails[] = [];
+  public getRoutes(): PlatformRouteDetails[] {
+    let routes: PlatformRouteDetails[] = [];
 
     this.routes.forEach((config: {route: string; provider: ControllerProvider}) => {
       routes = routes.concat(this.buildRoutes(config.route, config.provider));
@@ -111,10 +99,10 @@ export class Platform {
    * @param ctrl
    * @param endpointUrl
    */
-  private buildRoutes(endpointUrl: string, ctrl: ControllerProvider): IRouteDetails[] {
+  private buildRoutes(endpointUrl: string, ctrl: ControllerProvider): PlatformRouteDetails[] {
     const {injector} = this;
 
-    let routes: IRouteDetails[] = [];
+    let routes: PlatformRouteDetails[] = [];
 
     ctrl.children
       .map((ctrl) => injector.getProvider(ctrl))
@@ -123,18 +111,15 @@ export class Platform {
       });
 
     ctrl.endpoints.forEach((endpoint: EndpointMetadata) => {
-      const {operationPaths, params, targetName, propertyKey} = endpoint;
-
-      operationPaths.forEach(({path, method}) => {
+      endpoint.operationPaths.forEach(({path, method}) => {
         if (method) {
-          routes.push({
-            method,
-            name: `${targetName}.${String(propertyKey)}()`,
-            url: `${endpointUrl}${path || ""}`.replace(/\/\//gi, "/"),
-            className: targetName,
-            methodClassName: String(propertyKey),
-            parameters: params
-          });
+          routes.push(
+            new PlatformRouteDetails({
+              endpoint,
+              method,
+              url: `${endpointUrl}${path || ""}`.replace(/\/\//gi, "/")
+            })
+          );
         }
       });
     });

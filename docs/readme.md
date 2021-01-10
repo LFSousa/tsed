@@ -142,6 +142,12 @@ frameworks:
 - title: AWS
   href: /tutorials/aws.html
   src: /aws.png
+- title: OIDC
+  href: /tutorials/oidc.html
+  src: https://oauth.net/images/oauth-logo-square.png
+- title: Stripe
+  href: /tutorials/stripe.html
+  src: /stripe.svg
 ---
 
 ::: slot hero-brand
