@@ -17,6 +17,7 @@ describe("serialize()", () => {
     it("should serialize values", () => {
       expect(serialize(undefined)).to.eq(undefined);
       expect(serialize(null)).to.eq(null);
+      expect(serialize("null")).to.eq("null");
       expect(serialize(Symbol.for("TEST"))).to.eq("TEST");
       expect(serialize(false)).to.eq(false);
       expect(serialize(true)).to.eq(true);
@@ -34,6 +35,12 @@ describe("serialize()", () => {
       expect(serialize([""])).to.deep.eq([""]);
       expect(serialize(["1"])).to.deep.equal(["1"]);
       expect(serialize([1])).to.deep.equal([1]);
+
+      class ArrayLike extends Array {}
+      const arrayLike = new ArrayLike();
+      arrayLike.push(1);
+
+      expect(serialize(arrayLike)).to.deep.equal([1]);
     });
   });
   describe("Map<primitive>", () => {

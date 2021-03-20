@@ -18,6 +18,9 @@ describe("PlatformKoa integration", () => {
   describe("Inheritance controllers", () => {
     utils.test("inheritanceController");
   });
+  describe("Middlewares", () => {
+    utils.test("middlewares");
+  });
   describe("Scope Request", () => {
     utils.test("scopeRequest");
   });
@@ -68,6 +71,9 @@ describe("PlatformKoa integration", () => {
   });
   describe("Routing", () => {
     utils.test("routing");
+  });
+  describe("Controller inheritance", () => {
+    utils.test("inheritance");
   });
   describe("Locals", () => {
     utils.test("locals");

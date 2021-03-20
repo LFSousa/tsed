@@ -73,6 +73,33 @@ export class PlatformHandler {
   }
 
   /**
+   * Send the response to the consumer.
+   * @param data
+   * @param ctx
+   * @protected
+   */
+  async flush(data: any, ctx: PlatformContext) {
+    const {response, endpoint} = ctx;
+
+    if (endpoint) {
+      if (endpoint.view) {
+        data = await this.render(data, ctx);
+      } else if (shouldBeSerialized(data)) {
+        data = this.injector.get<ConverterService>(ConverterService)!.serialize(data, {
+          ...endpoint.getResponseOptions(),
+          endpoint: true
+        });
+      }
+    }
+
+    if (!response.isDone()) {
+      const responseFilter = this.injector.get<PlatformResponseFilter>(PlatformResponseFilter)!;
+
+      response.body(responseFilter.transform(data, ctx));
+    }
+  }
+
+  /**
    * Get argument from parameter medata or handler context.
    * @param type
    * @param h
@@ -164,25 +191,37 @@ export class PlatformHandler {
   protected async onRequest(requestOptions: OnRequestOptions): Promise<any> {
     const {metadata, $ctx, err} = requestOptions;
 
-    try {
-      const h = new HandlerContext({
-        $ctx,
-        metadata,
-        args: [],
-        err
-      });
+    return this.run($ctx, async () => {
+      try {
+        const h = new HandlerContext({
+          $ctx,
+          metadata,
+          args: [],
+          err
+        });
 
-      h.args = await this.getArgs(h);
+        h.args = await this.getArgs(h);
 
-      await h.callHandler();
+        await h.callHandler();
 
-      if (h.status === HandlerContextStatus.RESOLVED) {
-        // Can be canceled by the handler itself
-        return await this.onSuccess($ctx.data, requestOptions);
+        if (h.status === HandlerContextStatus.RESOLVED) {
+          // Can be canceled by the handler itself
+          return await this.onSuccess($ctx.data, requestOptions);
+        }
+      } catch (er) {
+        return this.onError(er, requestOptions);
       }
-    } catch (er) {
-      return this.onError(er, requestOptions);
-    }
+    });
+  }
+
+  /**
+   * Allow handler hack for AsyncHookContext plugin.
+   * @param $ctx
+   * @param cb
+   * @protected
+   */
+  run($ctx: PlatformContext, cb: any) {
+    return cb();
   }
 
   protected async onError(er: unknown, requestOptions: OnRequestOptions) {
@@ -238,31 +277,6 @@ export class PlatformHandler {
   }
 
   /**
-   * Send the response to the consumer.
-   * @param data
-   * @param ctx
-   * @protected
-   */
-  protected async flush(data: any, ctx: PlatformContext) {
-    const {response, endpoint} = ctx;
-
-    if (endpoint.view) {
-      data = await this.render(data, ctx);
-    } else if (shouldBeSerialized(data)) {
-      data = this.injector.get<ConverterService>(ConverterService)!.serialize(data, {
-        ...endpoint.getResponseOptions(),
-        endpoint: true
-      });
-    }
-
-    if (!response.isDone()) {
-      const responseFilter = this.injector.get<PlatformResponseFilter>(PlatformResponseFilter)!;
-
-      response.body(responseFilter.transform(data, ctx));
-    }
-  }
-
-  /**
    * Render the view if the endpoint has a configured view.
    * @param data
    * @param ctx
@@ -279,7 +293,7 @@ export class PlatformHandler {
   protected createRawHandler(metadata: HandlerMetadata): Function {
     switch (metadata.type) {
       case HandlerType.CUSTOM:
-        return (ctx: PlatformContext) => this.onRequest({metadata, $ctx: ctx});
+        return (ctx: PlatformContext, next: any) => this.onRequest({metadata, $ctx: ctx, next});
       case HandlerType.RAW_ERR_FN:
       case HandlerType.RAW_FN:
         return metadata.handler;

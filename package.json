@@ -1,10 +1,10 @@
 {
   "name": "@tsed/root",
-  "version": "6.20.0",
+  "version": "6.34.3",
   "description": "A TypeScript Framework on top of Express",
   "private": true,
   "scripts": {
-    "postinstall": "node tasks/yarn/postinstall.js",
+    "postinstall": "node tasks/yarn/postinstall.js && cd docs && yarn install",
     "configure": "monorepo ci configure",
     "clean": "monorepo clean workspace",
     "test": "yarn clean && yarn test:lint && yarn test:coverage",
@@ -21,8 +21,8 @@
     "examples:sync": "monorepo sync examples",
     "examples:publish": "monorepo publish examples",
     "api:build": "lerna run build && tsdoc",
-    "vuepress:build": "cross-env NODE_ENV=production node --max_old_space_size=8192 ./node_modules/vuepress/cli.js build docs",
-    "vuepress:serve": "vuepress dev docs",
+    "vuepress:build": "cd docs && yarn vuepress:build",
+    "vuepress:serve": "cd docs && yarn vuepress:serve",
     "prettier": "prettier '{packages,test}/**/*.ts' --write",
     "release": "semantic-release",
     "release:dryRun": "semantic-release --dry-run"
@@ -39,6 +39,7 @@
   },
   "keywords": [
     "Express",
+    "Koa",
     "TypeScript",
     "decorators",
     "router",
@@ -51,10 +52,19 @@
     "ioc",
     "di",
     "api",
-    "swagger",
-    "mongoose",
     "ajv",
+    "adapters",
+    "graphql",
+    "json-mapper",
+    "formio",
+    "objection",
+    "openspec",
+    "passport",
+    "awa",
     "socketio",
+    "stripe",
+    "swagger",
+    "typeoprm",
     "ES2015",
     "ES6",
     "server",
@@ -69,26 +79,26 @@
   },
   "homepage": "http://tsed.io/",
   "dependencies": {
-    "@tsed/logger": "^5.5.4",
+    "@tsed/logger": "^5.12.0",
     "ajv": "7.0.1",
     "consolidate": "0.16.0",
     "ejs": "^3.1.5",
     "ejs-lint": "1.1.0",
+    "change-case": "4.1.2",
     "globby": "11.0.1",
     "lerna": "3.22.1",
     "reflect-metadata": "0.1.13",
     "uuid": "8.3.2"
   },
   "devDependencies": {
-    "@tsed/markdown-it-symbols": "3.6.0",
-    "@tsed/monorepo-utils": "1.12.8",
+    "@tsed/monorepo-utils": "1.17.0",
     "@typedproject/ts-doc": "4.0.13",
     "@types/chai": "4.2.12",
     "@types/chai-as-promised": "7.1.3",
-    "@types/faker": "^5.1.5",
+    "@types/faker": "5.1.7",
     "@types/globby": "9.1.0",
     "@types/mocha": "8.0.3",
-    "@types/node": "14.14.10",
+    "@types/node": "14.14.34",
     "@types/proxyquire": "1.3.28",
     "@types/sinon": "9.0.8",
     "@types/sinon-chai": "3.2.4",
@@ -111,7 +121,7 @@
     "husky": "4.3.0",
     "lint-staged": "10.4.0",
     "micromatch": "4.0.2",
-    "mocha": "8.1.3",
+    "mocha": "8.2.1",
     "nyc": "15.1.0",
     "prettier": "2.1.2",
     "proxyquire": "2.1.3",
@@ -121,11 +131,8 @@
     "supertest": "6.0.0",
     "ts-node": "9.0.0",
     "tsconfig-paths": "3.9.0",
-    "tslib": "2.0.1",
-    "typescript": "4.0.2",
-    "vue-analytics": "5.22.1",
-    "vuepress": "1.8.0",
-    "vuepress-theme-tsed": "3.6.0"
+    "tslib": "2.1.0",
+    "typescript": "4.2.3"
   },
   "directories": {
     "packages": "packages",
@@ -134,6 +141,9 @@
   "workspaces": {
     "packages": [
       "packages/*"
+    ],
+    "nohoist": [
+      "**/fs-extra/**"
     ]
   },
   "monorepo": {

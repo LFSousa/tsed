@@ -1,6 +1,14 @@
-import {getJsonSchema, getSpec, In, Name, OperationPath, Path, Property, Required, Returns, SpecTypes} from "@tsed/schema";
+import {CollectionOf, getJsonSchema, getSpec, In, Name, OperationPath, Path, Property, Required, Returns, SpecTypes} from "@tsed/schema";
 import {expect} from "chai";
 import {Groups} from "./groups";
+
+class ChildModel {
+  @Groups("!creation")
+  id: string;
+
+  @Required()
+  prop1: string;
+}
 
 class MyModel {
   @Groups("!creation")
@@ -17,95 +25,34 @@ class MyModel {
   @Property()
   @Required()
   prop3: string;
+
+  @CollectionOf(ChildModel)
+  prop4: ChildModel[];
 }
 
 describe("@Groups", () => {
   describe("JsonSchema", () => {
-    it("should show fields with group annotation if the an empty array is given to group fields", () => {
+    it("should show fields with group annotation", () => {
       const spec = getJsonSchema(MyModel, {
-        groups: []
+        groups: false
       });
 
       expect(spec).to.deep.equal({
-        properties: {
-          id: {
-            type: "string"
-          },
-          prop3: {
-            minLength: 1,
-            type: "string"
+        definitions: {
+          ChildModel: {
+            properties: {
+              id: {
+                type: "string"
+              },
+              prop1: {
+                minLength: 1,
+                type: "string"
+              }
+            },
+            required: ["prop1"],
+            type: "object"
           }
         },
-        required: ["prop3"],
-        type: "object"
-      });
-    });
-
-    it("should show fields with group annotation if the an empty any groups is given", () => {
-      const spec = getJsonSchema(MyModel);
-
-      expect(spec).to.deep.equal({
-        properties: {
-          id: {
-            type: "string"
-          },
-          prop3: {
-            minLength: 1,
-            type: "string"
-          }
-        },
-        required: ["prop3"],
-        type: "object"
-      });
-    });
-
-    it("should display fields when a group match with (group.summary)", () => {
-      const spec = getJsonSchema(MyModel, {
-        groups: ["group.summary"]
-      });
-
-      expect(spec).to.deep.equal({
-        properties: {
-          id: {
-            type: "string"
-          },
-          prop1: {
-            minLength: 1,
-            type: "string"
-          },
-          prop3: {
-            minLength: 1,
-            type: "string"
-          }
-        },
-        required: ["prop1", "prop3"],
-        type: "object"
-      });
-    });
-
-    it("should display fields when a group match with (creation)", () => {
-      const spec = getJsonSchema(MyModel, {
-        groups: ["creation"]
-      });
-
-      expect(spec).to.deep.equal({
-        properties: {
-          prop3: {
-            minLength: 1,
-            type: "string"
-          }
-        },
-        required: ["prop3"],
-        type: "object"
-      });
-    });
-
-    it("should display fields when a group match with (pattern)", () => {
-      const spec = getJsonSchema(MyModel, {
-        groups: ["group.*"]
-      });
-
-      expect(spec).to.deep.equal({
         properties: {
           id: {
             type: "string"
@@ -121,6 +68,223 @@ describe("@Groups", () => {
           prop3: {
             minLength: 1,
             type: "string"
+          },
+          prop4: {
+            items: {
+              $ref: "#/definitions/ChildModel"
+            },
+            type: "array"
+          }
+        },
+        required: ["prop1", "prop2", "prop3"],
+        type: "object"
+      });
+    });
+    it("should show fields with group annotation if the an empty array is given to group fields", () => {
+      const spec = getJsonSchema(MyModel, {
+        groups: []
+      });
+
+      expect(spec).to.deep.equal({
+        definitions: {
+          ChildModel: {
+            properties: {
+              id: {
+                type: "string"
+              },
+              prop1: {
+                minLength: 1,
+                type: "string"
+              }
+            },
+            required: ["prop1"],
+            type: "object"
+          }
+        },
+        properties: {
+          id: {
+            type: "string"
+          },
+          prop3: {
+            minLength: 1,
+            type: "string"
+          },
+          prop4: {
+            items: {
+              $ref: "#/definitions/ChildModel"
+            },
+            type: "array"
+          }
+        },
+        required: ["prop3"],
+        type: "object"
+      });
+    });
+
+    it("should show fields with group annotation if the an empty any groups is given", () => {
+      const spec = getJsonSchema(MyModel);
+
+      expect(spec).to.deep.equal({
+        definitions: {
+          ChildModel: {
+            properties: {
+              id: {
+                type: "string"
+              },
+              prop1: {
+                minLength: 1,
+                type: "string"
+              }
+            },
+            required: ["prop1"],
+            type: "object"
+          }
+        },
+        properties: {
+          id: {
+            type: "string"
+          },
+          prop3: {
+            minLength: 1,
+            type: "string"
+          },
+          prop4: {
+            items: {
+              $ref: "#/definitions/ChildModel"
+            },
+            type: "array"
+          }
+        },
+        required: ["prop3"],
+        type: "object"
+      });
+    });
+
+    it("should display fields when a group match with (group.summary)", () => {
+      const spec = getJsonSchema(MyModel, {
+        groups: ["group.summary"]
+      });
+
+      expect(spec).to.deep.equal({
+        definitions: {
+          ChildModel: {
+            properties: {
+              id: {
+                type: "string"
+              },
+              prop1: {
+                minLength: 1,
+                type: "string"
+              }
+            },
+            required: ["prop1"],
+            type: "object"
+          }
+        },
+        properties: {
+          id: {
+            type: "string"
+          },
+          prop1: {
+            minLength: 1,
+            type: "string"
+          },
+          prop3: {
+            minLength: 1,
+            type: "string"
+          },
+          prop4: {
+            items: {
+              $ref: "#/definitions/ChildModel"
+            },
+            type: "array"
+          }
+        },
+        required: ["prop1", "prop3"],
+        type: "object"
+      });
+    });
+
+    it("should display fields when a group match with (creation)", () => {
+      const spec = getJsonSchema(MyModel, {
+        groups: ["creation"]
+      });
+
+      expect(spec).to.deep.equal({
+        definitions: {
+          ChildModel: {
+            properties: {
+              id: {
+                type: "string"
+              },
+              prop1: {
+                minLength: 1,
+                type: "string"
+              }
+            },
+            required: ["prop1"],
+            type: "object"
+          }
+        },
+        properties: {
+          prop3: {
+            minLength: 1,
+            type: "string"
+          },
+          prop4: {
+            items: {
+              $ref: "#/definitions/ChildModel"
+            },
+            type: "array"
+          }
+        },
+        required: ["prop3"],
+        type: "object"
+      });
+    });
+
+    it("should display fields when a group match with (pattern)", () => {
+      const spec = getJsonSchema(MyModel, {
+        groups: ["group.*"]
+      });
+
+      expect(spec).to.deep.equal({
+        definitions: {
+          ChildModel: {
+            properties: {
+              id: {
+                type: "string"
+              },
+              prop1: {
+                minLength: 1,
+                type: "string"
+              }
+            },
+            required: ["prop1"],
+            type: "object"
+          }
+        },
+        properties: {
+          id: {
+            type: "string"
+          },
+          prop1: {
+            minLength: 1,
+            type: "string"
+          },
+          prop2: {
+            minLength: 1,
+            type: "string"
+          },
+          prop3: {
+            minLength: 1,
+            type: "string"
+          },
+          prop4: {
+            items: {
+              $ref: "#/definitions/ChildModel"
+            },
+            type: "array"
           }
         },
         required: ["prop1", "prop2", "prop3"],
@@ -150,6 +314,19 @@ describe("@Groups", () => {
       expect(spec).to.deep.equal({
         components: {
           schemas: {
+            ChildModel: {
+              properties: {
+                id: {
+                  type: "string"
+                },
+                prop1: {
+                  minLength: 1,
+                  type: "string"
+                }
+              },
+              required: ["prop1"],
+              type: "object"
+            },
             MyModel: {
               properties: {
                 id: {
@@ -158,6 +335,12 @@ describe("@Groups", () => {
                 prop3: {
                   minLength: 1,
                   type: "string"
+                },
+                prop4: {
+                  items: {
+                    $ref: "#/components/schemas/ChildModel"
+                  },
+                  type: "array"
                 }
               },
               required: ["prop3"],
@@ -168,6 +351,12 @@ describe("@Groups", () => {
                 prop3: {
                   minLength: 1,
                   type: "string"
+                },
+                prop4: {
+                  items: {
+                    $ref: "#/components/schemas/ChildModel"
+                  },
+                  type: "array"
                 }
               },
               required: ["prop3"],
@@ -189,6 +378,12 @@ describe("@Groups", () => {
                 prop3: {
                   minLength: 1,
                   type: "string"
+                },
+                prop4: {
+                  items: {
+                    $ref: "#/components/schemas/ChildModel"
+                  },
+                  type: "array"
                 }
               },
               required: ["prop1", "prop2", "prop3"],
@@ -259,6 +454,123 @@ describe("@Groups", () => {
                     }
                   },
                   description: "Success"
+                }
+              },
+              tags: ["MyController"]
+            }
+          }
+        },
+        tags: [
+          {
+            name: "MyController"
+          }
+        ]
+      });
+    });
+    it("should display fields when a group match with (array - OS3)", () => {
+      @Path("/")
+      class MyController {
+        @OperationPath("POST", "/")
+        @(Returns(201, Array).Of(MyModel).Groups("group.*"))
+        async createWithArray(@In("body") @Groups("creation") @CollectionOf(MyModel) payload: MyModel[]) {
+          return [new MyModel()];
+        }
+      }
+
+      const spec = getSpec(MyController, {specType: SpecTypes.OPENAPI});
+
+      expect(spec).to.deep.equal({
+        components: {
+          schemas: {
+            ChildModel: {
+              properties: {
+                id: {
+                  type: "string"
+                },
+                prop1: {
+                  minLength: 1,
+                  type: "string"
+                }
+              },
+              required: ["prop1"],
+              type: "object"
+            },
+            MyModelCreation: {
+              properties: {
+                prop3: {
+                  minLength: 1,
+                  type: "string"
+                },
+                prop4: {
+                  items: {
+                    $ref: "#/components/schemas/ChildModel"
+                  },
+                  type: "array"
+                }
+              },
+              required: ["prop3"],
+              type: "object"
+            },
+            MyModelGroup: {
+              properties: {
+                id: {
+                  type: "string"
+                },
+                prop1: {
+                  minLength: 1,
+                  type: "string"
+                },
+                prop2: {
+                  minLength: 1,
+                  type: "string"
+                },
+                prop3: {
+                  minLength: 1,
+                  type: "string"
+                },
+                prop4: {
+                  items: {
+                    $ref: "#/components/schemas/ChildModel"
+                  },
+                  type: "array"
+                }
+              },
+              required: ["prop1", "prop2", "prop3"],
+              type: "object"
+            }
+          }
+        },
+        paths: {
+          "/": {
+            post: {
+              operationId: "myControllerCreateWithArray",
+              parameters: [],
+              requestBody: {
+                content: {
+                  "application/json": {
+                    schema: {
+                      items: {
+                        $ref: "#/components/schemas/MyModelCreation"
+                      },
+                      type: "array"
+                    }
+                  }
+                },
+                required: false
+              },
+              responses: {
+                "201": {
+                  content: {
+                    "application/json": {
+                      schema: {
+                        items: {
+                          $ref: "#/components/schemas/MyModelGroup"
+                        },
+                        type: "array"
+                      }
+                    }
+                  },
+                  description: "Created"
                 }
               },
               tags: ["MyController"]

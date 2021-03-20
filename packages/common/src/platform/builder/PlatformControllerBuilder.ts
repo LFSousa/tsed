@@ -2,10 +2,13 @@ import {Type} from "@tsed/core";
 import {InjectorService} from "@tsed/di";
 import {JsonMethodPath, OperationMethods} from "@tsed/schema";
 import {EndpointMetadata} from "../../mvc/models/EndpointMetadata";
+import {ParamMetadata} from "../../mvc/models/ParamMetadata";
+import {ParamTypes} from "../../mvc/models/ParamTypes";
 import {ControllerProvider} from "../domain/ControllerProvider";
 import {PlatformRouterMethods} from "../interfaces/PlatformRouterMethods";
 import {bindEndpointMiddleware} from "../middlewares/bindEndpointMiddleware";
 import {PlatformAcceptMimesMiddleware} from "../middlewares/PlatformAcceptMimesMiddleware";
+import {PlatformMulterMiddleware} from "../middlewares/PlatformMulterMiddleware";
 import {PlatformRouter} from "../services/PlatformRouter";
 import {useCtxHandler} from "../utils/useCtxHandler";
 
@@ -29,7 +32,7 @@ export class PlatformControllerBuilder {
   public build(injector: InjectorService): PlatformRouterMethods {
     const {
       routerOptions,
-      middlewares: {useBefore, useAfter}
+      middlewares: {useBefore}
     } = this.provider;
 
     this.provider.setRouter(PlatformRouter.create(injector, routerOptions));
@@ -37,7 +40,6 @@ export class PlatformControllerBuilder {
     // Controller lifecycle
     this.buildMiddlewares(useBefore) // Controller before-middleware
       .buildEndpoints() // All endpoints and his middlewares
-      .buildMiddlewares(useAfter) // Controller after-middleware
       .buildChildrenCtrls(injector); // Children controllers
 
     return this.provider.getRouter();
@@ -81,21 +83,26 @@ export class PlatformControllerBuilder {
   private buildEndpoint(endpoint: EndpointMetadata) {
     const {beforeMiddlewares, middlewares: mldwrs, afterMiddlewares, operation} = endpoint;
     const {
-      middlewares: {use}
+      middlewares: {use, useAfter}
     } = this.provider;
 
     const router = this.provider.getRouter<PlatformRouter>();
     // Endpoint lifecycle
     let handlers: any[] = [];
 
+    const hasFiles = [...endpoint.children.values()].find((item: ParamMetadata) => item.paramType === ParamTypes.FILES);
+
     handlers = handlers
       .concat(useCtxHandler(bindEndpointMiddleware(endpoint)))
       .concat(PlatformAcceptMimesMiddleware)
+      .concat(hasFiles && PlatformMulterMiddleware)
       .concat(use) // Controller use-middlewares
       .concat(beforeMiddlewares) // Endpoint before-middlewares
+      // .concat(endpoint.cache && PlatformCacheMiddleware)
       .concat(mldwrs) // Endpoint middlewares
       .concat(endpoint) // Endpoint metadata
       .concat(afterMiddlewares) // Endpoint after-middlewares
+      .concat(useAfter) // Controller after middlewares (equivalent to afterEach)
       .filter((item: any) => !!item);
 
     // Add handlers to the router

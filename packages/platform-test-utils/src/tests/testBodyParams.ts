@@ -1,9 +1,14 @@
-import {BodyParams, Controller, HeaderParams, PlatformTest, Post} from "@tsed/common";
-import {RawBodyParams} from "@tsed/common/src/mvc/decorators/params/rawBodyParams";
-import {getSpec, Required, SpecTypes, Status} from "@tsed/schema";
+import "@tsed/ajv";
+import {BodyParams, Controller, HeaderParams, PlatformTest, Post, RawBodyParams} from "@tsed/common";
+import {Required, Status} from "@tsed/schema";
 import {expect} from "chai";
 import SuperTest from "supertest";
 import {PlatformTestOptions} from "../interfaces";
+
+enum MyEnum {
+  TITLE,
+  AGE
+}
 
 @Controller("/body-params")
 class TestBodyParamsCtrl {
@@ -31,6 +36,16 @@ class TestBodyParamsCtrl {
   @Post("/scenario-5")
   testScenario5(@RawBodyParams() payload: any): any {
     return {value: payload.toString("utf8")};
+  }
+
+  @Post("/scenario-6")
+  testScenario6(@BodyParams("type", String) type: keyof typeof MyEnum): any {
+    return {type};
+  }
+
+  @Post("/scenario-7")
+  testScenario7(@BodyParams("test") value: string): any {
+    return {value};
   }
 }
 
@@ -139,6 +154,30 @@ export function testBodyParams(options: PlatformTestOptions) {
 
       expect(response.body).to.deep.equal({
         value: '{"test": ["value"]}'
+      });
+    });
+  });
+
+  describe("Scenario6: Enum", () => {
+    it("should return value", async () => {
+      const response = await request.post("/rest/body-params/scenario-6").send({
+        type: "TITLE"
+      });
+
+      expect(response.body).to.deep.equal({
+        type: "TITLE"
+      });
+    });
+  });
+
+  describe("Scenario7: payload with Null", () => {
+    it("should return value", async () => {
+      const response = await request.post("/rest/body-params/scenario-7").send({
+        test: null
+      });
+
+      expect(response.body).to.deep.equal({
+        value: null
       });
     });
   });

@@ -9,9 +9,10 @@ import {serializeJsonSchema} from "../utils/serializeJsonSchema";
 import {toJsonRegex} from "../utils/toJsonRegex";
 import {AliasMap, AliasType} from "./JsonAliasMap";
 import {JsonFormatTypes} from "./JsonFormatTypes";
+import {JsonLazyRef} from "./JsonLazyRef";
 import {SpecTypes} from "./SpecTypes";
 
-export interface JsonSchemaObject extends JSONSchema6 {
+export interface JsonSchemaObject extends JSONSchema6, Record<string, any> {
   type: (any | JSONSchema6TypeName) | (any | JSONSchema6TypeName)[];
   additionalProperties?: boolean | JSONSchema6 | any;
   propertyNames?: boolean | JSONSchema6 | any;
@@ -27,7 +28,15 @@ function mapToJsonSchema(item: any): any {
     return (item as any[]).map(mapToJsonSchema);
   }
 
-  return item instanceof JsonSchema ? item : JsonSchema.from(item as any);
+  if (item instanceof JsonSchema) {
+    return item;
+  }
+
+  if (item instanceof JsonLazyRef) {
+    return item;
+  }
+
+  return JsonSchema.from(item as any);
 }
 
 function mapProperties(properties: {[p: string]: any}) {
@@ -46,6 +55,7 @@ function mapProperties(properties: {[p: string]: any}) {
 export class JsonSchema extends Map<string, any> implements NestedGenerics {
   readonly $hooks = new Hooks();
   readonly $required: Set<string> = new Set();
+  readonly $allow: any[] = [];
   public $selfRequired: boolean;
   protected _genericLabels: string[];
   protected _nestedGenerics: Type<any>[][] = [];
@@ -344,6 +354,11 @@ export class JsonSchema extends Map<string, any> implements NestedGenerics {
     return this;
   }
 
+  allow(...allow: any[]) {
+    this.$allow.push(...allow);
+    return this;
+  }
+
   /**
    * Elements of this array must be unique.
    * An object instance is valid against this keyword if every item in the array is the name of a property in the instance.
@@ -514,7 +529,7 @@ export class JsonSchema extends Map<string, any> implements NestedGenerics {
   /**
    * @see https://tools.ietf.org/html/draft-wright-json-schema-validation-01#section-6.28
    */
-  oneOf(oneOf: (JsonSchemaObject | JsonSchema)[]) {
+  oneOf(oneOf: (JsonSchemaObject | JsonSchema | JsonLazyRef | any)[]) {
     super.set("oneOf", oneOf.map(mapToJsonSchema));
 
     return this;
@@ -701,22 +716,10 @@ export class JsonSchema extends Map<string, any> implements NestedGenerics {
     return this;
   }
 
-  addTypes(...types: any[]) {
-    types = [].concat(this.get("type")).concat(types as never);
-    types = uniq(types).map(getJsonType);
-
-    this.type(types);
-    // @ts-ignore
-    delete this._target;
-  }
-
   any(...types: any[]) {
     types = uniq(types.length ? types : ["integer", "number", "string", "boolean", "array", "object", "null"]).map(getJsonType);
 
     this.type(types.length === 1 ? types[0] : types);
-
-    // @ts-ignore
-    delete this._target;
 
     return this;
   }

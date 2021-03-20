@@ -35,11 +35,15 @@ export interface PlatformLoggerSettings {
    * A function called for each incoming request to create a request id.
    * @returns {number}
    */
-  reqIdBuilder?: () => string;
+  reqIdBuilder?: (req: TsED.Request) => string;
   /**
    * Disable routes table displayed in the logger. By default debug is `false`.
    */
   disableRoutesSummary?: boolean;
+  /**
+   * Disable bootstrap log displayed in the logger. By default debug is `false`.
+   */
+  disableBootstrapLog?: boolean;
   /**
    * Specify log format. Example: `%[%d{[yyyy-MM-dd hh:mm:ss,SSS}] %p%] %m`. See [@tsed/logger configuration](https://typedproject.github.io/logger/).
    */

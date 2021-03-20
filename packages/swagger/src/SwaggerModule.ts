@@ -10,6 +10,7 @@ import {
   PlatformRouter,
   useCtxHandler
 } from "@tsed/common";
+import {normalizePath} from "@tsed/core";
 import Fs from "fs";
 import {join} from "path";
 import {SwaggerSettings} from "./interfaces";
@@ -81,10 +82,10 @@ export class SwaggerModule implements BeforeRoutesInit, OnReady {
 
     const displayLog = (host: any) => {
       this.settings.forEach((conf) => {
-        const {path = "/", doc} = conf;
+        const {path = "/", fileName = "swagger.json", doc} = conf;
         const url = typeof host.port === "number" ? `${host.protocol}://${host.address}:${host.port}` : "";
 
-        injector.logger.info(`[${doc || "default"}] Swagger JSON is available on ${url}${path}/swagger.json`);
+        injector.logger.info(`[${doc || "default"}] Swagger JSON is available on ${url}${normalizePath(path, fileName)}`);
         injector.logger.info(`[${doc || "default"}] Swagger UI is available on ${url}${path}/`);
       });
     };
@@ -101,8 +102,9 @@ export class SwaggerModule implements BeforeRoutesInit, OnReady {
   private getUrls() {
     return this.settings.reduce((acc: any[], conf) => {
       const {path = "/", fileName = "swagger.json", doc, hidden} = conf;
+
       if (!hidden) {
-        acc.push({url: `${path}/${fileName}`, name: doc || path});
+        acc.push({url: normalizePath(path, fileName), name: doc || path});
       }
 
       return acc;
@@ -115,10 +117,12 @@ export class SwaggerModule implements BeforeRoutesInit, OnReady {
    * @param urls
    */
   private createRouter(conf: SwaggerSettings, urls: string[]) {
-    const {cssPath, jsPath, viewPath = join(__dirname, "../views/index.ejs")} = conf;
+    const {disableSpec = false, fileName = "swagger.json", cssPath, jsPath, viewPath = join(__dirname, "../views/index.ejs")} = conf;
     const router = PlatformRouter.create(this.injector);
 
-    router.get("/swagger.json", useCtxHandler(this.middlewareSwaggerJson(conf)));
+    if (!disableSpec) {
+      router.get(normalizePath("/", fileName), useCtxHandler(this.middlewareSwaggerJson(conf)));
+    }
 
     if (viewPath) {
       if (cssPath) {

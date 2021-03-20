@@ -7,24 +7,24 @@ module.exports = {
   serviceWorker: false,
   theme: "tsed",
   head: [
-    ["link", { canonical: url }],
-    ["link", { rel: "shortcut icon", href: "/favicon.ico", type: "image/x-icon" }],
-    ["link", { rel: "icon", href: "/favicon.ico", type: "apple-touch-icon" }],
-    ["link", { rel: "icon", href: "/apple-touch-icon.png", type: "image/x-icon", sizes: "180x180" }],
-    ["link", { rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32" }],
-    ["link", { rel: "icon", href: "/favicon-16x16.png", type: "image/png", sizes: "16x16" }],
-    ["link", { rel: "manifest", href: "/site.webmanifest" }],
-    ["meta", { property: "og:url", content: url }],
-    ["meta", { property: "og:type", content: "website" }],
-    ["meta", { property: "og:site_name", content: title }],
-    ["meta", { property: "og:title", content: title }],
-    ["meta", { property: "og:description", content: description }],
-    ["meta", { property: "og:image", content: "https://tsed.io/tsed-og.png" }],
-    ["meta", { property: "og:image:width", content: "1024" }],
-    ["meta", { property: "og:image:height", content: "1024" }],
-    ["meta", { name: "twitter:title", content: title }],
-    ["meta", { name: "twitter:description", content: description }],
-    ["meta", { name: "twitter:card", content: "summary" }]
+    ["link", {canonical: url}],
+    ["link", {rel: "shortcut icon", href: "/favicon.ico", type: "image/x-icon"}],
+    ["link", {rel: "icon", href: "/favicon.ico", type: "apple-touch-icon"}],
+    ["link", {rel: "icon", href: "/apple-touch-icon.png", type: "image/x-icon", sizes: "180x180"}],
+    ["link", {rel: "icon", href: "/favicon-32x32.png", type: "image/png", sizes: "32x32"}],
+    ["link", {rel: "icon", href: "/favicon-16x16.png", type: "image/png", sizes: "16x16"}],
+    ["link", {rel: "manifest", href: "/site.webmanifest"}],
+    ["meta", {property: "og:url", content: url}],
+    ["meta", {property: "og:type", content: "website"}],
+    ["meta", {property: "og:site_name", content: title}],
+    ["meta", {property: "og:title", content: title}],
+    ["meta", {property: "og:description", content: description}],
+    ["meta", {property: "og:image", content: "https://tsed.io/tsed-og.png"}],
+    ["meta", {property: "og:image:width", content: "1024"}],
+    ["meta", {property: "og:image:height", content: "1024"}],
+    ["meta", {name: "twitter:title", content: title}],
+    ["meta", {name: "twitter:description", content: description}],
+    ["meta", {name: "twitter:card", content: "summary"}]
   ],
 
   themeConfig: {
@@ -39,7 +39,8 @@ module.exports = {
       end: new Date().getFullYear()
     },
     repo: "TypedProject/tsed",
-    openCollective: "tsed",
+    githubProxyUrl: 'https://api.tsed.io/rest/github/TypedProject/tsed',
+    openCollective: 'https://api.tsed.io/rest/opencollective',
     gitterUrl: "https://gitter.im/Tsed-io/community",
     stackoverflowUrl: "https://stackoverflow.com/search?q=tsed",
     sponsorUrl: "https://tsed.io/support.html",
@@ -218,7 +219,9 @@ module.exports = {
               "/docs/hooks",
               "/docs/response-filter",
               "/docs/exceptions",
-              { title: "Context", path: "/docs/request-context" },
+              "/docs/logger",
+              {title: "Context", path: "/docs/request-context"},
+              "/docs/cache",
               "/docs/platform-api"
             ]
           },
@@ -227,9 +230,9 @@ module.exports = {
             collapsable: true,
             children: [
               "/docs/validation",
-              { title: "Upload files", path: "/docs/upload-files" },
-              { title: "Serve files", path: "/docs/serve-files" },
-              { title: "Templating", path: "/docs/templating" },
+              {title: "Upload files", path: "/docs/upload-files"},
+              {title: "Serve files", path: "/docs/serve-files"},
+              {title: "Templating", path: "/docs/templating"},
               "/docs/injection-scopes",
               "/docs/custom-providers",
               "/docs/custom-endpoint-decorators",
@@ -245,7 +248,7 @@ module.exports = {
               "/tutorials/mongoose",
               "/tutorials/graphql",
               "/tutorials/socket-io",
-              { title: "Seq logger", path: "/tutorials/seq" },
+              {title: "Seq logger", path: "/tutorials/seq"},
               "/tutorials/swagger",
               "/tutorials/ajv",
               "/tutorials/aws",
@@ -293,6 +296,10 @@ module.exports = {
           "/docs/interceptors",
           "/docs/authentication",
           "/docs/hooks",
+          "/docs/exceptions",
+          "/docs/cache",
+          "/docs/hooks",
+          "/docs/response-filter",
           "/docs/injection-scopes",
           "/docs/custom-providers",
           "/docs/custom-endpoint-decorators",
@@ -311,7 +318,6 @@ module.exports = {
         options: {
           margin: 16
         }
-
       }
     }
   },

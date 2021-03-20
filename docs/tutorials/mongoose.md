@@ -52,7 +52,7 @@ Then import `@tsed/mongoose` in your [Configuration](/docs/configuration.md):
 <Tabs class="-code">
   <Tab label="Configuration" icon="bx-code-alt">
   
-<<< @/docs/tutorials/snippets/mongoose/configuration.ts
+<<< @/tutorials/snippets/mongoose/configuration.ts
 
   </Tab>
   </Tab>
@@ -98,17 +98,17 @@ You can also use the common decorators to describe model (See [models](/docs/mod
 
 `@tsed/mongoose` works with models which must be explicitly declared.
 
-<<< @/docs/tutorials/snippets/mongoose/declaring-model.ts
+<<< @/tutorials/snippets/mongoose/declaring-model.ts
 
 ### Declaring a Model to a specific connection
 
-<<< @/docs/tutorials/snippets/mongoose/declaring-model-connection.ts
+<<< @/tutorials/snippets/mongoose/declaring-model-connection.ts
 
 ### Declaring a Schema
 
 `@tsed/mongoose` supports subdocuments which must be explicitly declared.
 
-<<< @/docs/tutorials/snippets/mongoose/declaring-schema.ts
+<<< @/tutorials/snippets/mongoose/declaring-schema.ts
 
 ::: tip
 Schema decorator accepts a second parameter to configure the Schema (See [Mongoose Schema](https://mongoosejs.com/docs/guide.html#options))
@@ -119,7 +119,7 @@ Schema decorator accepts a second parameter to configure the Schema (See [Mongoo
 By default, `@tsed/mongoose` reuses the metadata stored by the decorators dedicated
 to describe a JsonSchema. These decorators come from the `@tsed/common` package.
 
-<<< @/docs/tutorials/snippets/mongoose/example-model-mongoose.ts
+<<< @/tutorials/snippets/mongoose/example-model-mongoose.ts
 
 ::: tip
 It isn't necessary to use @@Property@@ decorator on property when you use one of these decorators:
@@ -133,33 +133,35 @@ These decorators call automatically the @@Property@@ decorator.
 
 Mongoose and `@tsed/mongoose` support both lists and maps. 
 
-<<< @/docs/tutorials/snippets/mongoose/collections.ts
+<<< @/tutorials/snippets/mongoose/collections.ts
 
 ### Subdocuments
 
 `@tsed/mongoose` supports `mongoose` subdocuments as long as they are defined schemas. Therefore, subdocuments must be decorated by `@Schema()`.
 
-<<< @/docs/tutorials/snippets/mongoose/subdocuments.ts
+<<< @/tutorials/snippets/mongoose/subdocuments.ts
 
 ### References
 
 `@tsed/mongoose` supports `mongoose` references between defined models.
 
-<<< @/docs/tutorials/snippets/mongoose/references.ts
+<<< @/tutorials/snippets/mongoose/references.ts
 
-Be aware of circular dependencies. Direct references must be declared after the referred class has been declared. 
-This means the reference cannot know the referred class directly at runtime.
+### Circular References
+`@tsed/mongoose` supports `mongoose` circular references between defined models.
+When you have models that either both refer to each other, or refer to themselves there is a slightly different way to declare this inside those models.
 
-<<< @/docs/tutorials/snippets/mongoose/references-circular.ts
+In this example a **Customer** has many **Contracts** and each **Contract** has a reference back to the **Customer**. This is declared using an arrow function. ```() => ModelName```
+
+<<<@/tutorials/snippets/mongoose/extended-circular-reference.ts
 
 ### Virtual References
 
 `@tsed/mongoose` supports `mongoose` virtual references between defined models.
 
-Be aware of circular dependencies. Direct references must be declared after the referred class has been declared. 
-This means the virtual reference cannot know the referred class directly at runtime.
+The same rules for Circular References apply (**See above**);
 
-<<< @/docs/tutorials/snippets/mongoose/virtual-references.ts
+<<< @/tutorials/snippets/mongoose/virtual-references.ts
 
 ### Dynamic References
 
@@ -167,7 +169,7 @@ This means the virtual reference cannot know the referred class directly at runt
 
 This works by having a field with the referenced object model's name and a field with the referenced field.
 
-<<< @/docs/tutorials/snippets/mongoose/dynamic-references.ts
+<<< @/tutorials/snippets/mongoose/dynamic-references.ts
 
 ## Register hook
 
@@ -181,7 +183,7 @@ Ts.ED provides class decorator to register middlewares on the pre and post hook.
 We can simply attach a @@PreHook@@ decorator to the model class and
  define the hook function like we would normally do in Mongoose.
  
-<<< @/docs/tutorials/snippets/mongoose/pre-hook.ts
+<<< @/tutorials/snippets/mongoose/pre-hook.ts
 
 This will execute the pre-save hook each time a `CarModel` document is saved. 
 
@@ -190,7 +192,7 @@ This will execute the pre-save hook each time a `CarModel` document is saved.
 We can simply attach a @@PostHook@@ decorator to the model class and
  define the hook function like we would normally do in Mongoose.
  
-<<< @/docs/tutorials/snippets/mongoose/post-hook.ts
+<<< @/tutorials/snippets/mongoose/post-hook.ts
 
 This will execute the post-save hook each time a `CarModel` document is saved. 
 
@@ -200,13 +202,13 @@ Using the @@Plugin@@ decorator enables the developer to attach various Mongoose 
 Just like the regular `schema.plugin()` call, the decorator accepts 1 or 2 parameters: the plugin itself, and an optional configuration object. 
 Multiple `plugin` decorator can be used for a single model class.
 
-<<< @/docs/tutorials/snippets/mongoose/plugin.ts
+<<< @/tutorials/snippets/mongoose/plugin.ts
 
 ## Inject model
 
 It's possible to inject a model into a Service (or Controller, Middleware, etc...):
 
-<<< @/docs/tutorials/snippets/mongoose/inject-model.ts
+<<< @/tutorials/snippets/mongoose/inject-model.ts
 
 ::: tip
 You can find a working example on [Mongoose here](https://github.com/TypedProject/tsed-example-mongoose).
@@ -278,12 +280,12 @@ This example shows you how you can test your Rest API with superagent and a mock
 <Tabs class="-code">
 <Tab label="Jest">
 
-<<< @/docs/tutorials/snippets/mongoose/testing-api.jest.ts
+<<< @/tutorials/snippets/mongoose/testing-api.jest.ts
 
 </Tab>
 <Tab label="Mocha">
 
-<<< @/docs/tutorials/snippets/mongoose/testing-api.mocha.ts
+<<< @/tutorials/snippets/mongoose/testing-api.mocha.ts
 
 </Tab>
 </Tabs>
@@ -317,12 +319,12 @@ This example shows you how can test the model:
 <Tabs class="-code">
 <Tab label="Jest">
 
-<<< @/docs/tutorials/snippets/mongoose/testing-model.jest.ts
+<<< @/tutorials/snippets/mongoose/testing-model.jest.ts
 
 </Tab>
 <Tab label="Mocha">
 
-<<< @/docs/tutorials/snippets/mongoose/testing-model.mocha.ts
+<<< @/tutorials/snippets/mongoose/testing-model.mocha.ts
 
 </Tab>
 </Tabs>

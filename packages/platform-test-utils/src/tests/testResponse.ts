@@ -1,9 +1,10 @@
 import {Context, Controller, Get, Next, PathParams, PlatformResponse, PlatformTest, Post, Res} from "@tsed/common";
-import {ContentType, Ignore, Property, Status} from "@tsed/schema";
+import {ContentType, getSpec, Ignore, Property, Returns, SpecTypes, Status} from "@tsed/schema";
 import {expect} from "chai";
 import {createReadStream} from "fs";
 import {join} from "path";
 import {of} from "rxjs";
+import {agent, SuperAgentStatic} from "superagent";
 import SuperTest from "supertest";
 import {PlatformTestOptions} from "../interfaces";
 
@@ -126,7 +127,7 @@ class TestResponseParamsCtrl {
   }
 
   @Get("/scenario11")
-  get() {
+  testScenario11() {
     const t = new EmptyModel();
 
     t.raw = 1;
@@ -136,10 +137,30 @@ class TestResponseParamsCtrl {
   }
 
   @Get("/scenario12")
-  getBuffer(@Res() res: PlatformResponse) {
+  testScenario12(@Res() res: PlatformResponse) {
     res.attachment("filename");
 
     return Buffer.from("Hello");
+  }
+
+  @Get("/scenario13")
+  async testScenario13(@Res() res: PlatformResponse) {
+    const http: SuperAgentStatic = agent();
+
+    const image_res = await http.get("https://www.google.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png");
+
+    res.setHeader("Content-Disposition", "inline;filename=googlelogo_color_272x92dp.png;");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Content-Type", "image/png");
+
+    return image_res.body;
+  }
+
+  @Get("/scenario14")
+  public scenario14() {
+    return {
+      jsonexample: 1
+    };
   }
 }
 
@@ -313,6 +334,31 @@ export function testResponse(options: PlatformTestOptions) {
       expect(response.headers["content-type"]).to.contains("application/octet-stream");
       expect(response.headers["content-length"]).to.equal("5");
       expect(response.body.toString()).to.deep.equal("Hello");
+    });
+  });
+
+  describe("Scenario13: Return buffer", () => {
+    it("should return image", async () => {
+      const response = await request.get("/rest/response/scenario13");
+
+      expect(response.headers["content-disposition"]).to.equal("inline;filename=googlelogo_color_272x92dp.png;");
+      expect(response.headers["content-type"]).to.contains("image/png");
+      expect(response.headers["content-length"]).to.equal("5969");
+    });
+  });
+
+  describe("Scenario13: Return application/json when Accept is */*", () => {
+    it("should return a */* content-type", async () => {
+      const response = await request
+        .get("/rest/response/scenario14")
+        .set("Accept", "*/*")
+        .set("Content-Type", "application/json")
+        .expect(200);
+
+      expect(response.headers["content-type"]).to.equal("application/json; charset=utf-8");
+      expect(response.body).to.deep.equal({
+        jsonexample: 1
+      });
     });
   });
 }

@@ -13,6 +13,7 @@ import {testHeaders} from "./testHeaders";
 import {testInheritanceController} from "./testInheritanceController";
 import {testLocals} from "./testLocals";
 import {testLocation} from "./testLocation";
+import {testMiddlewares} from "./testMiddlewares";
 import {testModule} from "./testModule";
 import {testMulter} from "./testMulter";
 import {testPathParams} from "./testPathParams";
@@ -25,12 +26,14 @@ import {testScopeRequest} from "./testScopeRequest";
 import {testSession} from "./testSession";
 import {testStatics} from "./testStatics";
 import {testView} from "./testView";
+import {testCache} from "./testCache";
 
 export const specsContainer = new Map<string, (options: PlatformTestOptions) => void>();
 
 // HANDLERS AND MIDDLEWARES
 specsContainer.set("handlers", testHandlers);
 specsContainer.set("auth", testAuth);
+specsContainer.set("middlewares", testMiddlewares);
 
 // RESPONSES
 specsContainer.set("headers", testHeaders);
@@ -43,6 +46,7 @@ specsContainer.set("response", testResponse);
 specsContainer.set("responseFilter", testResponseFilter);
 specsContainer.set("custom404", testCustom404);
 specsContainer.set("statics", testStatics);
+specsContainer.set("cache", testCache);
 
 // INPUTS
 specsContainer.set("cookies", testCookies);

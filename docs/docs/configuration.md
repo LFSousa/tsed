@@ -34,11 +34,11 @@ The default configuration is as follows:
 
 You can customize your configuration as follows on `Server.ts`level:
 
-<<< @/docs/docs/snippets/configuration/server.ts
+<<< @/docs/snippets/configuration/server.ts
 
 or when you bootstrap your Server (e.g. `index.ts`):
 
-<<< @/docs/docs/snippets/configuration/bootstrap.ts
+<<< @/docs/snippets/configuration/bootstrap.ts
 
 ::: tip Note
 Ts.ED supports [ts-node](https://github.com/TypeStrong/ts-node). Ts extension will be replaced by a Js extension if 
@@ -56,12 +56,12 @@ as following:
 <Tabs class="-code">
   <Tab label="node-config">
 
-<<< @/docs/docs/snippets/configuration/bootstrap-with-node-config.ts
+<<< @/docs/snippets/configuration/bootstrap-with-node-config.ts
 
   </Tab>
   <Tab label="dotenv">
 
-<<< @/docs/docs/snippets/configuration/bootstrap-with-dotenv.ts
+<<< @/docs/snippets/configuration/bootstrap-with-dotenv.ts
 
   </Tab>  
 </Tabs>
@@ -143,24 +143,24 @@ Mount all given controllers and map controllers to the corresponding endpoints.
 Ts.ED provides the possibility to mount multiple Rest paths instead of the default path `/rest`.
 This option will allow you to define a version for an endpoint and select which controllers you want to associate with the given path.
 
-<<< @/docs/docs/snippets/configuration/server-endpoint-versionning.ts
+<<< @/docs/snippets/configuration/server-endpoint-versionning.ts
 
 It is also possible to split the configuration by using the @@Module@@:
 
 <Tabs class="-code">
   <Tab label="Server.ts">
 
-<<< @/docs/docs/snippets/configuration/server-endpoint-versionning-with-module.ts
+<<< @/docs/snippets/configuration/server-endpoint-versionning-with-module.ts
 
   </Tab>
   <Tab label="ModuleV1.ts">
 
-<<< @/docs/docs/snippets/configuration/modulev1-endpoint-versionning.ts
+<<< @/docs/snippets/configuration/modulev1-endpoint-versionning.ts
 
   </Tab>  
   <Tab label="ModuleV0.ts">
 
-<<< @/docs/docs/snippets/configuration/modulev0-endpoint-versionning.ts
+<<< @/docs/snippets/configuration/modulev0-endpoint-versionning.ts
 
   </Tab>    
 </Tabs>
@@ -171,6 +171,72 @@ It is also possible to split the configuration by using the @@Module@@:
 
 List of glob pattern to scan directories which contains [Services](/docs/services.md), [Middlewares](/docs/middlewares.md) or [Converters](/docs/converters.md).
 
+### middlewares <Badge text="v6.28.0+" />
+
+- type: `PlatformMiddlewareSettings[]`
+
+A middleware list (Express.js, Ts.ED, Koa, etc...) must be loaded on the `$beforeRoutesInit` hook or on the specified hook. 
+In addition, it's also possible to configure the environment for which the middleware should be loaded.
+
+Here is an example to load middlewares with the previous version (this example will be always available!):
+
+```typescript
+import {Configuration, ProviderScope, ProviderType} from "@tsed/di";
+import {Env} from "@tsed/core";
+
+@Configuration({})
+export class Server {
+  $afterInit(){
+    this.app.use(helmet({contentSecurityPolicy: false}))
+  }
+  $beforeRoutesInit() {
+    if (this.env === Env.PROD) {
+      this.app.use(EnsureHttpsMiddleware);
+    }
+
+    this.app
+      .use(cors())
+      .use(cookieParser())
+      .use(compress({}))
+      .use(methodOverride())
+      .use(bodyParser.json())
+      .use(bodyParser.urlencoded({
+        extended: true
+      }))
+      .use(AuthTokenMiddleware);
+
+    return null;
+  }
+}
+```
+
+After v6.28.0, you can use the middlewares options as follows:
+
+```typescript
+import {Configuration, ProviderScope, ProviderType} from "@tsed/di";
+
+@Configuration({
+  middlewares: [
+    {hook: '$afterInit', use: helmet({contentSecurityPolicy: false})},
+    {env: Env.PROD, use: EnsureHttpsMiddleware},
+    cors(),
+    cookieParser(),
+    compress({}),
+    methodOverride(),
+    bodyParser.json(),
+    bodyParser.urlencoded({
+      extended: true
+    }),
+    AuthTokenMiddleware
+  ]
+})
+export class Server {
+}
+```
+::: warning Order priority
+The middlewares added through `middlewares` options will always be registered after the middlewares registered through the hook methods!
+:::
+
 ### imports
 
 - type: `Type<any>[]`
@@ -180,12 +246,12 @@ Add providers or modules here. These modules or provider will be built before th
 <Tabs class="-code">
   <Tab label="Server.ts">
 
-<<< @/docs/docs/snippets/configuration/server-options-imports.ts
+<<< @/docs/snippets/configuration/server-options-imports.ts
 
   </Tab>
   <Tab label="MyModule.ts">
 
-<<< @/docs/docs/snippets/configuration/module-options-imports.ts
+<<< @/docs/snippets/configuration/module-options-imports.ts
 
   </Tab>
 </Tabs>
@@ -218,7 +284,7 @@ export class Server {
 
 - type: @@PlatformLoggerSettings@@
 
-Logger configuration. See [logger section for more detail](/docs/configuration.md#logger-2).
+Logger configuration. See [logger section for more detail](/docs/logger.md).
 
 ### resolvers - External DI
 
@@ -229,11 +295,11 @@ now allows you to configure multiple external DI by using the `resolvers` option
 
 The resolvers options can be configured as following:
 
-<<< @/docs/docs/snippets/configuration/server-resolvers.ts
+<<< @/docs/snippets/configuration/server-resolvers.ts
 
 It's also possible to register resolvers with the @@Module@@ decorator:
 
-<<< @/docs/docs/snippets/configuration/module-resolvers.ts
+<<< @/docs/snippets/configuration/module-resolvers.ts
 
 ### views
 
@@ -268,7 +334,7 @@ The global configuration for the Express.Router. See express [documentation](htt
 
 Object to mount all directories under an endpoint.
 
-<<< @/packages/platform-express/src/interfaces/PlatformExpressStaticsOptions.ts
+<<< @/../packages/platform-express/src/interfaces/PlatformExpressStaticsOptions.ts
 
   </Tab>
   <Tab label="Koa.js">
@@ -400,133 +466,6 @@ import {Configuration} from "@tsed/common";
 export class Server {}
 ```
 
-
-## Logger
-### Default logger
-
-Default logger used by Ts.ED is [@tsed/logger](https://logger.tsed.io). 
-
- - [Configuration](https://logger.tsed.io/getting-started.html),
- - [Customize appender (chanel)](https://logger.tsed.io/appenders/custom.html),
- - [Customize layout](https://logger.tsed.io/layouts/custom.html)
-
-### Configuration
-
-Some options are provided:
-
-- `logger.level`: Change the default log level displayed in the terminal. Values: `debug`, `info`, `warn` or `error`. By default: `info`. 
-- `logger.logRequest`: Log all incoming requests. By default, it's true and prints the configured `logger.requestFields`.
-- `logger.requestFields`: Fields displayed when a request is logged. Possible values: `reqId`, `method`, `url`, `headers`, `body`, `query`,`params`, `duration`.
-- `logger.reqIdBuilder`: A function called for each incoming request to create a request id.
-- `logger.jsonIndentation`: The number of space characters to use as white space in JSON output. Default is 2 (0 in production).
-- `logger.disableRoutesSummary`: Disable routes table displayed in the logger. By default debug is `false`.
-- `logger.format`: Specify log format. Example: `%[%d{[yyyy-MM-dd hh:mm:ss,SSS}] %p%] %m`. See [@tsed/logger configuration](https://logger.tsed.io).
-- `logger.ignoreUrlPatterns` (`String` or `RegExp`): List of patterns to ignore logged request according to the `request.url`.
-
-::: warning
-It is recommended to disable logRequest in production. Logger has a cost on the performance.
-:::
-
-### Inject logger
-
-Logger can be injected in any injectable provider as following:
-
-```typescript
-import {Logger} from "@tsed/common";
-import {Injectable, Inject} from "@tsed/di";
-
-@Injectable()
-export class MyService {
-  @Inject()
-  logger: Logger;
-  
-  $onInit() {
-    this.logger.info('Hello world');
-  }
-}
-```
-
-### Request logger
-
-For each Express.Request, a logger will be attached and can be used like here:
-
-```typescript
-import {Controller, Context, Get} from "@tsed/common";
-import {Logger} from "@tsed/logger";
-
-@Controller("/")
-class MyController {
-  @Get('/')
-  get(@Context("logger") logger: Logger) {
-    logger.info({customData: "test"}); // parameter is optional
-    logger.debug({customData: "test"})
-    logger.warn({customData: "test"})
-    logger.error({customData: "test"})
-    logger.trace({customData: "test"})
-  }
-}
-```
-
-A call with one of these methods will generate a log according to the `logger.requestFields` configuration:
-
-```bash
-[2017-09-01 11:12:46.994] [INFO ] [TSED] - {
-  "status": 200,
-  "reqId": 1,
-  "method": "GET",
-  "url": "/api-doc/swagger.json",
-  "duration": 92,
-  "headers": {
-    "host": "0.0.0.0:8001",
-    "connection": "keep-alive",
-    "upgrade-insecure-requests": "1",
-    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
-    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-    "accept-encoding": "gzip, deflate",
-    "accept-language": "fr-FR,fr;q=0.8,en-US;q=0.6,en;q=0.4"
-  },
-  "body": {},
-  "query": {},
-  "customData": "test"
-}
-```
-
-You can configure this output from configuration:
-
-```typescript
-import {Configuration} from "@tsed/common";
-
-@Configuration({
-  logger: {
-    requestFields: ["reqId", "method", "url", "headers", "body", "query","params", "duration"]
-  }
-})
-export class Server {
-
-}
-```
-
-or you can override the middleware with @@OverrideProvider@@.
-
-Example: 
-
-<<< @/docs/docs/snippets/configuration/override-platform-log-middleware.ts
-
-### Shutdown logger
-
-Shutdown returns a Promise that will be resolved when @tsed/logger has closed all appenders and finished writing log events. 
-Use this when your program exits to make sure all your logs are written to files, sockets are closed, etc.
-
-```typescript
-import {$log} from "@tsed/logger";
-
-$log
-  .shutdown()
-  .then(() => {
-     console.log("Complete")
-  }); 
-```
-
 ## Get configuration
 
 The configuration can be reused throughout your application in different ways. 
@@ -557,7 +496,7 @@ Decorators @@Constant@@ and @@Value@@ can be used in all classes including:
  
 @@Constant@@ and @@Value@@ accepts an expression as parameters to inspect the configuration object and return the value.
 
-<<< @/docs/docs/snippets/providers/binding-configuration.ts
+<<< @/docs/snippets/providers/binding-configuration.ts
 
 ::: warning
 @@Constant@@ returns an Object.freeze() value.

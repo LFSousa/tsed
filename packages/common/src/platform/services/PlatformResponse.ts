@@ -24,6 +24,8 @@ export class PlatformResponse<T extends {[key: string]: any} = any> {
   @Inject()
   platformViews: PlatformViews;
 
+  data: any;
+
   constructor(@Opts public raw: T) {}
 
   /**
@@ -69,6 +71,10 @@ export class PlatformResponse<T extends {[key: string]: any} = any> {
    */
   get(name: string) {
     return this.raw.get(name);
+  }
+
+  getHeaders(): Record<string, number | string | string[]> {
+    return this.raw.getHeaders();
   }
 
   /**
@@ -236,6 +242,7 @@ export class PlatformResponse<T extends {[key: string]: any} = any> {
    * @param data
    */
   body(data: any) {
+    this.data = data;
     if (data === undefined) {
       this.raw.send();
 
@@ -254,7 +261,7 @@ export class PlatformResponse<T extends {[key: string]: any} = any> {
       }
 
       this.contentLength(data.length);
-      this.raw.send(data.toString());
+      this.raw.send(data);
 
       return this;
     }
@@ -268,6 +275,10 @@ export class PlatformResponse<T extends {[key: string]: any} = any> {
     this.raw.json(data);
 
     return this;
+  }
+
+  getBody() {
+    return this.data;
   }
 
   /**
@@ -293,6 +304,7 @@ export class PlatformResponse<T extends {[key: string]: any} = any> {
   destroy() {
     // @ts-ignore
     delete this.raw;
+    delete this.data;
   }
 
   isHeadersSent() {
